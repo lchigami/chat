@@ -30,7 +30,8 @@ function handleUserLeft(msg) {
 	$("select#users option[value='" + msg.userName + "']").remove();
 }
 
-socket = io.connect("http://localhost:3000");
+//socket = io.connect("http://localhost:3000");
+socket = io.connect(document.location);
 
 function setFeedback(fb) {
   $('span#feedback').html(fb);
@@ -44,7 +45,7 @@ function setUsername() {
 
 function sendMessage() {
     var trgtUser = $('select#users').val();
-    socket.emit('message', 
+    socket.emit('message',
                 {
                   "inferSrcUser": true,
                   "source": "",
@@ -69,7 +70,7 @@ $(function() {
   socket.on('userJoined', function(msg) {
     appendNewUser(msg.userName, true);
   });
-  
+
   socket.on('userLeft', function(msg) {
     handleUserLeft(msg);
   });
@@ -90,7 +91,7 @@ $(function() {
 		  setFeedback("<span style='color: red'> Username already in use. Try another name.</span>");
 	  }
   });
-  
+
   $('input#userName').change(setUsername);
   $('input#userName').keypress(function(e) {
 	  if (e.keyCode == 13) {
@@ -100,7 +101,7 @@ $(function() {
 		  e.preventDefault();
 	  }
   });
-  
+
   $('input#msg').keypress(function(e) {
 	  if (e.keyCode == 13) {
 		  sendMessage();

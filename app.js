@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -34,14 +33,12 @@ app.get('/chat', chat.main);
 app.get('/users', user.list);
 
 var server = app.listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
+    console.log("Express server listening on port " + app.get('port'));
 });
-
 var io = socketio.listen(server);
-
 var clients = {};
-var socketsOfClients = {};
 
+var socketsOfClients = {};
 io.sockets.on('connection', function(socket) {
   socket.on('set username', function(userName) {
     // Is this an existing user name?
@@ -50,7 +47,7 @@ io.sockets.on('connection', function(socket) {
       clients[userName] = socket.id;
       socketsOfClients[socket.id] = userName;
       userNameAvailable(socket.id, userName);
-	  userJoined(userName);
+      userJoined(userName);
     } else
     if (clients[userName] === socket.id) {
       // Ignore for now
@@ -58,7 +55,6 @@ io.sockets.on('connection', function(socket) {
       userNameAlreadyInUse(socket.id, userName);
     }
   });
-
   socket.on('message', function(msg) {
     var srcUser;
     if (msg.inferSrcUser) {
@@ -67,6 +63,7 @@ io.sockets.on('connection', function(socket) {
     } else {
       srcUser = msg.source;
     }
+
     if (msg.target == "All") {
       // broadcast
       io.sockets.emit('message',
@@ -75,26 +72,27 @@ io.sockets.on('connection', function(socket) {
            "target": msg.target});
     } else {
       // Look up the socket id
-      io.sockets.sockets[clients[msg.target]].emit('message', 
+      io.sockets.sockets[clients[msg.target]].emit('message',
           {"source": srcUser,
            "message": msg.message,
            "target": msg.target});
     }
   })
-
   socket.on('disconnect', function() {
-	  var uName = socketsOfClients[socket.id];
-	  delete socketsOfClients[socket.id];
+    var uName = socketsOfClients[socket.id];
+    delete socketsOfClients[socket.id];
     delete clients[uName];
-	// relay this message to all the clients
-	userLeft(uName);
+
+    // relay this message to all the clients
+
+    userLeft(uName);
   })
 })
 
 function userJoined(uName) {
-	Object.keys(socketsOfClients).forEach(function(sId) {
-		io.sockets.sockets[sId].emit('userJoined', { "userName": uName });
-	})
+    Object.keys(socketsOfClients).forEach(function(sId) {
+      io.sockets.sockets[sId].emit('userJoined', { "userName": uName });
+    })
 }
 
 function userLeft(uName) {
@@ -103,9 +101,10 @@ function userLeft(uName) {
 
 function userNameAvailable(sId, uName) {
   setTimeout(function() {
+
     console.log('Sending welcome msg to ' + uName + ' at ' + sId);
-	
     io.sockets.sockets[sId].emit('welcome', { "userName" : uName, "currentUsers": JSON.stringify(Object.keys(clients)) });
+
   }, 500);
 }
 
